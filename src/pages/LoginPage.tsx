@@ -1,3 +1,4 @@
+// src/pages/LoginPage.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -8,7 +9,7 @@ import Avatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper"; // Can still use Paper for elevation if needed
+import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Visibility from "@mui/icons-material/Visibility";
@@ -19,6 +20,7 @@ import Tooltip from "@mui/material/Tooltip";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Fade from "@mui/material/Fade";
 import { useTheme } from "@mui/material/styles";
+import Divider from "@mui/material/Divider"; // Import Divider
 
 // Ensure this image exists in your /public folder
 const placeholderImageUrl = "/eye_logo.webp"; // Or your chosen image
@@ -42,6 +44,7 @@ const LoginPage: React.FC = () => {
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
+    // ... (keep existing submit logic)
     event.preventDefault();
     setError(null);
     setLoading(true);
@@ -65,6 +68,11 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  const handleSignUpClick = () => {
+    console.log("Navigate to Sign Up page (not implemented yet)");
+    // Optional: navigate('/signup'); // You would need to define this route
+  };
+
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -73,73 +81,68 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Container
-      component="main"
-      maxWidth={false} // Allow filling the screen width
-      sx={{ height: "100vh", p: 0 }} // Fill height, remove padding
-    >
-      {/* Main Flex Container: Switches direction based on screen size */}
+    <Container component="main" maxWidth={false} sx={{ height: "100vh", p: 0 }}>
       <Box
         sx={{
           display: "flex",
           height: "100%",
-          flexDirection: { xs: "column", sm: "row" }, // Column on mobile, Row on larger
+          flexDirection: { xs: "column", sm: "row" },
         }}
       >
-        {/* Image Box (Left Side) */}
+        {/* Image Box */}
         <Box
           sx={{
-            width: { xs: "100%", sm: "45%", md: "60%" }, // Responsive width
-            display: { xs: "none", sm: "block" }, // Hide on mobile, show on larger
-            height: { xs: "30%", sm: "100%" }, // Example height on mobile if shown, full height on larger
+            width: { xs: "100%", sm: "45%", md: "60%" },
+            display: { xs: "none", sm: "block" },
+            height: { xs: "30%", sm: "100%" },
             backgroundImage: `url(${placeholderImageUrl})`,
             backgroundRepeat: "no-repeat",
-            backgroundColor: (t) =>
-              t.palette.mode === "light"
-                ? t.palette.grey[50]
-                : t.palette.grey[900],
             backgroundSize: "contain",
             backgroundPosition: "center",
-            // Optional border
-            // borderRight: { sm: `1px solid ${theme.palette.divider}` },
+            backgroundColor: (t) =>
+              t.palette.mode === "light"
+                ? t.palette.grey[100]
+                : t.palette.grey[900],
           }}
         />
 
-        {/* Form Box (Right Side) - Apply Paper styles here */}
+        {/* Form Box */}
         <Box
-          component={Paper} // Use Paper for styling the form container
+          component={Paper}
           elevation={6}
-          square // Remove rounded corners
+          square
           sx={{
-            width: { xs: "100%", sm: "55%", md: "40%" }, // Responsive width
-            height: "100%", // Take full height of the flex container
+            width: { xs: "100%", sm: "55%", md: "40%" },
+            height: "100%",
             display: "flex",
-            flexDirection: "column", // Stack content vertically
-            alignItems: "center", // Center content horizontally
-            justifyContent: "center", // Center content vertically
-            overflowY: "auto", // Allow scrolling if content overflows on small heights
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            overflowY: "auto",
           }}
         >
-          {/* Inner Box for Padding and Max Width */}
           <Fade in={animate} timeout={1000}>
             <Box
               sx={{
-                p: 4, // Padding around the form
+                p: 4,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                width: "100%", // Takes width of parent
-                maxWidth: 400, // Max width for the form elements
+                width: "100%",
+                maxWidth: 400,
               }}
             >
               <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-                <LockOutlinedIcon />
+                {" "}
+                <LockOutlinedIcon />{" "}
               </Avatar>
               <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
-                Sign In
+                {" "}
+                Sign In{" "}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Welcome back! Please enter your credentials.
+                {" "}
+                Welcome back! Please enter your credentials.{" "}
               </Typography>
 
               {/* Form */}
@@ -180,11 +183,13 @@ const LoginPage: React.FC = () => {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
+                          {" "}
                           <Tooltip
                             title={
                               showPassword ? "Hide password" : "Show password"
                             }
                           >
+                            {" "}
                             <IconButton
                               aria-label="toggle password visibility"
                               onClick={handleClickShowPassword}
@@ -192,25 +197,25 @@ const LoginPage: React.FC = () => {
                               edge="end"
                               disabled={loading}
                             >
+                              {" "}
                               {showPassword ? (
                                 <VisibilityOff />
                               ) : (
                                 <Visibility />
-                              )}
-                            </IconButton>
-                          </Tooltip>
+                              )}{" "}
+                            </IconButton>{" "}
+                          </Tooltip>{" "}
                         </InputAdornment>
                       ),
                     }}
                   />
                 </Tooltip>
-
                 {error && (
                   <Alert severity="error" sx={{ width: "100%", mt: 2, mb: 1 }}>
-                    {error}
+                    {" "}
+                    {error}{" "}
                   </Alert>
                 )}
-
                 <Button
                   type="submit"
                   fullWidth
@@ -218,20 +223,40 @@ const LoginPage: React.FC = () => {
                   sx={{ mt: 3, mb: 2, py: 1.2 }}
                   disabled={loading}
                 >
+                  {" "}
                   {loading ? (
                     <CircularProgress size={24} color="inherit" />
                   ) : (
                     "Sign In"
-                  )}
+                  )}{" "}
                 </Button>
+
+                {/* === Sign Up Button Section === */}
+                <Divider sx={{ my: 2 }}>
+                  {" "}
+                  {/* Optional Divider */}
+                  <Typography variant="caption">New Here?</Typography>
+                </Divider>
+                <Button
+                  fullWidth
+                  variant="text" // Use text variant for less emphasis
+                  onClick={handleSignUpClick}
+                  sx={{ mt: 1, mb: 2 }}
+                  disabled={loading} // Disable if login is in progress
+                >
+                  Create an Account (Sign Up)
+                </Button>
+                {/* ============================== */}
               </Box>
 
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ mt: 5 }}
+                sx={{ mt: 3 }}
               >
-                © {new Date().getFullYear()} Your Company Name
+                {" "}
+                {/* Reduced margin */}© {new Date().getFullYear()} Your Company
+                Name
               </Typography>
             </Box>
           </Fade>
