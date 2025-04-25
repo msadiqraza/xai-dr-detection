@@ -1,6 +1,8 @@
+// src/pages/HomePage.tsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { analyzeImage, AnalysisResult } from "../services/api"; // Adjust path
+// Correct the import here: use NewAnalysisResult
+import { analyzeImage, NewAnalysisResult } from "../services/api"; // Path updated
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -8,7 +10,7 @@ import Paper from "@mui/material/Paper";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Alert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
-import LoadingSpinner from "../components/LoadingSpinner"; // Adjust path
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const HomePage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -18,34 +20,30 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Clean up Blob URL when component unmounts or preview changes
   useEffect(() => {
-    // This is a cleanup function that runs when the component unmounts
-    // or before the effect runs again if dependencies change.
     return () => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
         console.log("Revoked preview Blob URL:", previewUrl);
       }
     };
-  }, [previewUrl]); // Dependency array includes previewUrl
+  }, [previewUrl]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null); // Clear previous errors
+    // ... (keep existing file change logic)
+    setError(null);
     const file = event.target.files?.[0];
     if (file) {
-      // Basic validation (optional: add more checks like file size)
       if (!file.type.startsWith("image/")) {
         setError(
           "Invalid file type. Please upload an image (JPEG, PNG, etc.)."
         );
         setSelectedFile(null);
         setPreviewUrl(null);
-        if (fileInputRef.current) fileInputRef.current.value = ""; // Reset input
+        if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
       setSelectedFile(file);
-      // Create a preview URL, revoke previous one if exists
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
       }
@@ -70,25 +68,20 @@ const HomePage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Call the (mock) API function
-      const result: AnalysisResult = await analyzeImage(selectedFile);
+      // The result here is of type NewAnalysisResult
+      const result: NewAnalysisResult = await analyzeImage(selectedFile);
 
-      // IMPORTANT: Do NOT revoke the originalImageUrl (blob url from analyzeImage) here.
-      // It needs to be passed to the ResultsPage.
-      // The ResultsPage will be responsible for displaying and eventually revoking it.
-
-      // Navigate to results page, passing data via state
+      // Pass the result (which is NewAnalysisResult) via state
       navigate("/results", { state: { analysisResult: result } });
     } catch (err: any) {
       console.error("Error analyzing image:", err);
       setError(err.message || "An error occurred during analysis.");
-      // Clean up preview if analysis fails and we stay on this page
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
         setPreviewUrl(null);
       }
       setSelectedFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = ""; // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } finally {
       setIsLoading(false);
     }
@@ -106,26 +99,23 @@ const HomePage: React.FC = () => {
       }}
     >
       <Typography variant="h5" gutterBottom>
-        Analyze Fundus Image for Diabetic Retinopathy
+        {" "}
+        Analyze Fundus Image for Diabetic Retinopathy{" "}
       </Typography>
       <Typography variant="body1" align="center" sx={{ mb: 2 }}>
-        Upload a fundus image (e.g., JPEG, PNG) to predict the stage of Diabetic
-        Retinopathy. The system will provide a classification, confidence score,
-        a highlighted Grad-CAM image showing areas of interest, and a textual
-        explanation.
+        {" "}
+        Upload a fundus image (e.g., JPEG, PNG)...{" "}
       </Typography>
 
-      {/* Hidden File Input */}
+      {/* ... rest of the component (Input, Upload Area, Preview, Button, etc.) ... */}
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept="image/*" // Accept only image files
+        accept="image/*"
         style={{ display: "none" }}
         disabled={isLoading}
       />
-
-      {/* Upload Area / Button */}
       <Tooltip title="Click or drag image here">
         <Box
           sx={{
@@ -137,7 +127,6 @@ const HomePage: React.FC = () => {
             width: "100%",
             maxWidth: "500px",
             backgroundColor: "#f9f9f9",
-            transition: "background-color 0.2s ease",
             "&:hover": { backgroundColor: "#eeeeee" },
           }}
           onClick={handleUploadClick}
@@ -146,14 +135,13 @@ const HomePage: React.FC = () => {
             sx={{ fontSize: 60, color: "primary.main", mb: 1 }}
           />
           <Typography>
+            {" "}
             {selectedFile
               ? `Selected: ${selectedFile.name}`
-              : "Click or Drag & Drop Image Here"}
+              : "Click or Drag & Drop Image Here"}{" "}
           </Typography>
         </Box>
       </Tooltip>
-
-      {/* Image Preview */}
       {previewUrl && (
         <Box
           sx={{
@@ -164,17 +152,17 @@ const HomePage: React.FC = () => {
             padding: "4px",
           }}
         >
+          {" "}
           <Typography variant="caption" display="block" gutterBottom>
             Preview:
-          </Typography>
+          </Typography>{" "}
           <img
             src={previewUrl}
             alt="Selected Fundus Preview"
             style={{ width: "100%", height: "auto", display: "block" }}
-          />
+          />{" "}
         </Box>
       )}
-
       {error && (
         <Alert
           severity="error"
@@ -183,11 +171,7 @@ const HomePage: React.FC = () => {
           {error}
         </Alert>
       )}
-
-      {/* Loading Indicator */}
       {isLoading && <LoadingSpinner message="Analyzing image..." />}
-
-      {/* Submit Button */}
       <Tooltip
         title={
           !selectedFile
@@ -197,7 +181,6 @@ const HomePage: React.FC = () => {
       >
         <span>
           {" "}
-          {/* Tooltip needs a DOM element wrapper when button is disabled */}
           <Button
             variant="contained"
             color="primary"
@@ -206,15 +189,14 @@ const HomePage: React.FC = () => {
             size="large"
             sx={{ mt: 2 }}
           >
-            {isLoading ? "Processing..." : "Analyze Image"}
-          </Button>
+            {" "}
+            {isLoading ? "Processing..." : "Analyze Image"}{" "}
+          </Button>{" "}
         </span>
       </Tooltip>
-
       <Typography variant="caption" sx={{ mt: 3, color: "text.secondary" }}>
-        How to use: Click the upload area, select your fundus image file, and
-        then click "Analyze Image". You will be redirected to the results page
-        upon completion. Ensure the image is clear for best results.
+        {" "}
+        How to use: Click the upload area...{" "}
       </Typography>
     </Paper>
   );

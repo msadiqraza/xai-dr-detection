@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
 import HomePage from "../pages/HomePage";
 import ResultsPage from "../pages/ResultsPage";
-import HistoryPage from "../pages/HistoryPage"; // Import HistoryPage
+import HistoryPage from "../pages/HistoryPage";
 import MainLayout from "../layouts/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import { useAuth } from "../contexts/AuthContext";
@@ -14,24 +14,22 @@ const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
-      {/* Public Route: Login */}
       <Route
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
       />
 
-      {/* Protected Routes within MainLayout */}
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
+          {/* Route for new results (relies on location.state) */}
           <Route path="/results" element={<ResultsPage />} />
-          {/* === Add History Route === */}
+          {/* Route for viewing specific history result via ID */}
+          <Route path="/results/:historyId" element={<ResultsPage />} />
           <Route path="/history" element={<HistoryPage />} />
-          {/* ========================= */}
         </Route>
       </Route>
 
-      {/* Fallback Route */}
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />}
