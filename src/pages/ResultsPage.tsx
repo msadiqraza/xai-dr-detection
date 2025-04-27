@@ -4,7 +4,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom"; // Impor
 import {
   NewAnalysisResult,
   HistoryDetail,
-  isNewAnalysisResult,
   isHistoryDetail,
   fetchHistoryDetails, // Import history fetch function
   getChipColor,

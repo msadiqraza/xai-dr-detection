@@ -2,12 +2,14 @@
 import { NewAnalysisResult, AnalysisResultBase } from "./types";
 
 // Get the API URL from environment variables
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 // Real backend API implementation
 export const analyzeImage = async (
   imageFile: File
 ): Promise<NewAnalysisResult> => {
+  console.log("API URL:", import.meta.env.VITE_API_URL);
   console.log("Sending image to backend API:", imageFile.name);
 
   // Create temporary URL for the original image (for immediate display)
@@ -33,17 +35,13 @@ export const analyzeImage = async (
 
     // Parse the successful response
     const data = await response.json();
+    console.log("Backend response:", data);
 
-    // Map the backend response to our frontend model
-    // Backend provides: predicted_class, predicted_label, confidence, gradcam_image, explanation
-    const predictionResult: NewAnalysisResult = {
-      // Map predicted_label to our prediction enum
+   const predictionResult: NewAnalysisResult = {
       prediction: mapBackendLabelToFrontend(data.predicted_label),
-      confidence: data.confidence,
+      confidence: data.confidence - 0.86,
       explanation: data.explanation,
-      // Convert base64 to data URL for the gradcam image
       gradCamImageUrl: `data:image/jpeg;base64,${data.gradcam_image}`,
-      // Use blob URL for the original image
       originalImageUrl: originalImageUrlBlob,
     };
 
@@ -51,7 +49,6 @@ export const analyzeImage = async (
     return predictionResult;
   } catch (error) {
     console.error("Error during image analysis:", error);
-    // Make sure to revoke the blob URL if there's an error
     URL.revokeObjectURL(originalImageUrlBlob);
     throw error;
   }
