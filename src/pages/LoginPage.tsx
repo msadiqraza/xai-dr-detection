@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-// Removed Grid import
 import Avatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -18,20 +17,29 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Fade from "@mui/material/Fade";
 import { useTheme } from "@mui/material/styles";
-import Divider from "@mui/material/Divider"; // Import Divider
+import Divider from "@mui/material/Divider";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
 // Ensure this image exists in your /public folder
 const placeholderImageUrl = "/eye_logo.webp"; // Or your chosen image
 
 const LoginPage: React.FC = () => {
+  // State for form inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  
+  // UI state
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [animate, setAnimate] = useState(false);
+  const [tabValue, setTabValue] = useState(0); // 0 for login, 1 for signup
+  
+  // Hooks
   const navigate = useNavigate();
   const auth = useAuth();
   const theme = useTheme();
@@ -43,34 +51,52 @@ const LoginPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setError(null); // Clear any errors when switching tabs
+    setTabValue(newValue);
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
-    // ... (keep existing submit logic)
     event.preventDefault();
     setError(null);
     setLoading(true);
+    
     if (!email || !password) {
       setError("Email and password are required.");
       setLoading(false);
       return;
     }
+    
     try {
-      const success = await auth.login(email, password);
-      if (success) {
-        navigate("/");
-      } else {
-        setError("Invalid email or password.");
+      // For login tab
+      if (tabValue === 0) {
+        const { success, error } = await auth.login(email, password);
+        if (success) {
+          navigate("/");
+        } else {
+          setError(error || "Invalid email or password.");
+        }
+      } 
+      // For signup tab
+      else {
+        const { success, error } = await auth.signup(email, password);
+        if (success) {
+          // Show success message and switch to login tab
+          setError(null);
+          alert("Account created successfully! Please check your email for verification, then login.");
+          setTabValue(0); // Switch to login tab
+          setEmail("");
+          setPassword("");
+        } else {
+          setError(error || "Failed to create account.");
+        }
       }
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("Authentication error:", err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSignUpClick = () => {
-    console.log("Navigate to Sign Up page (not implemented yet)");
-    // Optional: navigate('/signup'); // You would need to define this route
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -133,17 +159,20 @@ const LoginPage: React.FC = () => {
               }}
             >
               <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-                {" "}
-                <LockOutlinedIcon />{" "}
+                {tabValue === 0 ? <LockOutlinedIcon /> : <PersonAddIcon />}
               </Avatar>
-              <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
-                {" "}
-                Sign In{" "}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                {" "}
-                Welcome back! Please enter your credentials.{" "}
-              </Typography>
+              
+              {/* Tabs for Login/Signup */}
+              <Tabs
+                value={tabValue}
+                onChange={handleTabChange}
+                aria-label="authentication tabs"
+                sx={{ mb: 3, width: '100%', borderBottom: 1, borderColor: 'divider' }}
+                centered
+              >
+                <Tab label="Sign In" />
+                <Tab label="Sign Up" />
+              </Tabs>
 
               {/* Form */}
               <Box
@@ -152,7 +181,7 @@ const LoginPage: React.FC = () => {
                 noValidate
                 sx={{ width: "100%" }}
               >
-                <Tooltip title="Enter your registered email address">
+                <Tooltip title="Enter your email address">
                   <TextField
                     margin="normal"
                     required
@@ -160,14 +189,14 @@ const LoginPage: React.FC = () => {
                     id="email"
                     label="Email Address"
                     name="email"
-                    autoComplete="email"
+                    autoComplete={tabValue === 0 ? "email" : "new-email"}
                     autoFocus
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
                   />
                 </Tooltip>
-                <Tooltip title="Enter your password">
+                <Tooltip title={tabValue === 0 ? "Enter your password" : "Create a strong password"}>
                   <TextField
                     margin="normal"
                     required
@@ -176,20 +205,14 @@ const LoginPage: React.FC = () => {
                     label="Password"
                     type={showPassword ? "text" : "password"}
                     id="password"
-                    autoComplete="current-password"
+                    autoComplete={tabValue === 0 ? "current-password" : "new-password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          {" "}
-                          <Tooltip
-                            title={
-                              showPassword ? "Hide password" : "Show password"
-                            }
-                          >
-                            {" "}
+                          <Tooltip title={showPassword ? "Hide password" : "Show password"}>
                             <IconButton
                               aria-label="toggle password visibility"
                               onClick={handleClickShowPassword}
@@ -197,25 +220,21 @@ const LoginPage: React.FC = () => {
                               edge="end"
                               disabled={loading}
                             >
-                              {" "}
-                              {showPassword ? (
-                                <VisibilityOff />
-                              ) : (
-                                <Visibility />
-                              )}{" "}
-                            </IconButton>{" "}
-                          </Tooltip>{" "}
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </Tooltip>
                         </InputAdornment>
                       ),
                     }}
                   />
                 </Tooltip>
+                
                 {error && (
                   <Alert severity="error" sx={{ width: "100%", mt: 2, mb: 1 }}>
-                    {" "}
-                    {error}{" "}
+                    {error}
                   </Alert>
                 )}
+                
                 <Button
                   type="submit"
                   fullWidth
@@ -223,30 +242,12 @@ const LoginPage: React.FC = () => {
                   sx={{ mt: 3, mb: 2, py: 1.2 }}
                   disabled={loading}
                 >
-                  {" "}
                   {loading ? (
                     <CircularProgress size={24} color="inherit" />
                   ) : (
-                    "Sign In"
-                  )}{" "}
+                    tabValue === 0 ? "Sign In" : "Create Account"
+                  )}
                 </Button>
-
-                {/* === Sign Up Button Section === */}
-                <Divider sx={{ my: 2 }}>
-                  {" "}
-                  {/* Optional Divider */}
-                  <Typography variant="caption">New Here?</Typography>
-                </Divider>
-                <Button
-                  fullWidth
-                  variant="text" // Use text variant for less emphasis
-                  onClick={handleSignUpClick}
-                  sx={{ mt: 1, mb: 2 }}
-                  disabled={loading} // Disable if login is in progress
-                >
-                  Create an Account (Sign Up)
-                </Button>
-                {/* ============================== */}
               </Box>
 
               <Typography
@@ -254,9 +255,7 @@ const LoginPage: React.FC = () => {
                 color="text.secondary"
                 sx={{ mt: 3 }}
               >
-                {" "}
-                {/* Reduced margin */}© {new Date().getFullYear()} Your Company
-                Name
+                © {new Date().getFullYear()} Diabetic Retinopathy System
               </Typography>
             </Box>
           </Fade>
