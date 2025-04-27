@@ -71,8 +71,15 @@ const HomePage: React.FC = () => {
       // The result here is of type NewAnalysisResult
       const result: NewAnalysisResult = await analyzeImage(selectedFile);
 
-      // Pass the result (which is NewAnalysisResult) via state
-      navigate("/results", { state: { analysisResult: result } });
+      // Pass the result and original filename to ResultsPage via state
+      navigate("/results", { 
+        state: { 
+          analysisResult: result,
+          filename: selectedFile.name,          // The actual filename from the selected file
+          originalFilename: selectedFile.name,  // Backup of original filename
+          saveToHistory: true                   // Flag to indicate this is a new analysis that should be saved
+        } 
+      });
     } catch (err: any) {
       console.error("Error analyzing image:", err);
       setError(err.message || "An error occurred during analysis.");

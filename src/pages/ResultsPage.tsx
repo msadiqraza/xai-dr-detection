@@ -7,6 +7,7 @@ import {
   isHistoryDetail,
   fetchHistoryDetails, // Import history fetch function
   getChipColor,
+  saveToHistory, // Import new saveToHistory function
 } from "../services/api"; // Path updated
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -43,6 +44,10 @@ const ResultsPage: React.FC = () => {
 
   // Store the blob URL ref separately for cleanup
   const [blobUrlRef, setBlobUrlRef] = useState<string | null>(null);
+  // Track if a new result has been saved to history
+  const [savedToHistory, setSavedToHistory] = useState<boolean>(false);
+  // Track the ID of the saved history entry for potential redirection
+  const [savedHistoryId, setSavedHistoryId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true; // Flag to prevent state updates on unmounted component
@@ -52,6 +57,7 @@ const ResultsPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       setBlobUrlRef(null); // Reset blob ref
+      setSavedToHistory(false); // Reset saved to history flag
 
       try {
         let data: ResultData | null = null;
@@ -67,6 +73,7 @@ const ResultsPage: React.FC = () => {
           // --- Using New Analysis Result from State ---
           console.log("Using new analysis result from location state");
           data = location.state.analysisResult as NewAnalysisResult;
+          
           // Check if it's a blob URL and store it for cleanup
           if (
             data.originalImageUrl &&
@@ -74,8 +81,74 @@ const ResultsPage: React.FC = () => {
           ) {
             setBlobUrlRef(data.originalImageUrl);
           }
-          // Clear location state after reading (optional but good practice)
-          // navigate(location.pathname, { replace: true, state: {} });
+
+          // Only attempt to save to history once during component lifecycle
+          if (data && !historyId && !savedToHistory && location.state?.saveToHistory === true) {
+            console.log("Attempting to save analysis to history (one time only)...");
+            
+            // Mark as saved in component state immediately to prevent duplicates
+            setSavedToHistory(true);
+            
+            // Extract the actual filename from the location state
+            const defaultFilename = location.state?.originalFilename || 'fundus_image.jpg';
+            const filename = location.state?.filename || defaultFilename;
+            console.log("Using filename for history:", filename);
+            
+            // Get the blob data if available and convert to base64 for permanent storage
+            let originalImageForStorage = data.originalImageUrl;
+            
+            // If this is a new blob URL, we need to convert it to a data URL for storage
+            if (data.originalImageUrl && data.originalImageUrl.startsWith('blob:')) {
+              try {
+                const response = await fetch(data.originalImageUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                
+                // Convert blob to base64 data URL
+                originalImageForStorage = await new Promise<string>((resolve) => {
+                  reader.onloadend = () => resolve(reader.result as string);
+                  reader.readAsDataURL(blob);
+                });
+                
+                console.log("Converted blob URL to data URL for storage");
+              } catch (convError) {
+                console.error("Failed to convert blob to data URL:", convError);
+                // Continue with the original URL if conversion fails
+              }
+            }
+            
+            // Ensure we have all required fields for the history entry
+            const historyEntry = {
+              ...data,
+              prediction: data.prediction,
+              confidence: data.confidence,
+              explanation: data.explanation,
+              gradCamImageUrl: data.gradCamImageUrl,
+              imageName: filename,
+              originalImageUrl: originalImageForStorage, // Use converted data URL if available
+            };
+            
+            try {
+              const historyId = await saveToHistory(historyEntry);
+              
+              if (historyId && isMounted) {
+                console.log(`Analysis saved to history with ID: ${historyId}`);
+                setSavedHistoryId(historyId);
+                
+                // Update state only AFTER successful save to prevent future saves
+                navigate(location.pathname, { 
+                  replace: true, 
+                  state: { 
+                    ...location.state,
+                    saveToHistory: false,
+                  }
+                });
+              }
+            } catch (err) {
+              console.error("Failed to save analysis to history:", err);
+              // Don't reset savedToHistory - we don't want to retry as that could cause duplicates
+            }
+          }
         } else {
           // --- No Data Found ---
           if (isMounted) {
