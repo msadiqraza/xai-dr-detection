@@ -2,16 +2,12 @@
 import React from "react";
 import Drawer from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar"; // Import Toolbar
-import Typography from "@mui/material/Typography"; // Import Typography
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
-import Box from "@mui/material/Box"; // Import Box for potential logo layout
-// Icons... (keep existing icon imports)
-import HomeIcon from "@mui/icons-material/Home";
 import HistoryIcon from "@mui/icons-material/History";
 import LogoutIcon from "@mui/icons-material/Logout";
 import VisibilityIcon from "@mui/icons-material/Visibility"; // Example icon for branding
@@ -20,6 +16,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import TroubleshootIcon from '@mui/icons-material/Troubleshoot';
 
 interface SidePanelProps {
   drawerWidth: number;
@@ -51,7 +48,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
   };
 
   const menuItems = [
-    { text: "Home", icon: <HomeIcon />, path: "/" },
+    { text: "DR Detection", icon: <TroubleshootIcon />, path: "/" },
     { text: "History", icon: <HistoryIcon />, path: "/history" },
   ];
 

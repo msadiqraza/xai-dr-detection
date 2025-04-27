@@ -310,7 +310,7 @@ const ResultsPage: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* Original Image */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Tooltip title="Click to view original image larger">
             <Card sx={{ height: "100%" }}>
               <CardActionArea
@@ -347,7 +347,7 @@ const ResultsPage: React.FC = () => {
         </Grid>
 
         {/* Grad-CAM Image */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Tooltip title="Click to view Grad-CAM image larger">
             <Card sx={{ height: "100%" }}>
               <CardActionArea
@@ -392,7 +392,7 @@ const ResultsPage: React.FC = () => {
         </Grid>
 
         {/* NLP Explanation */}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Paper elevation={1} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               {" "}

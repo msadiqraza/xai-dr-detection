@@ -18,11 +18,17 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import EmailIcon from "@mui/icons-material/Email";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Fade from "@mui/material/Fade";
-import { useTheme } from "@mui/material/styles";
-import Divider from "@mui/material/Divider";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Link from "@mui/material/Link";
 
 // Ensure this image exists in your /public folder
 const placeholderImageUrl = "/eye_logo.webp"; // Or your chosen image
@@ -38,11 +44,11 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [animate, setAnimate] = useState(false);
   const [tabValue, setTabValue] = useState(0); // 0 for login, 1 for signup
+  const [signupSuccessOpen, setSignupSuccessOpen] = useState(false); // For signup success dialog
   
   // Hooks
   const navigate = useNavigate();
   const auth = useAuth();
-  const theme = useTheme();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -81,9 +87,9 @@ const LoginPage: React.FC = () => {
       else {
         const { success, error } = await auth.signup(email, password);
         if (success) {
-          // Show success message and switch to login tab
+          // Show success dialog and switch to login tab
           setError(null);
-          alert("Account created successfully! Please check your email for verification, then login.");
+          setSignupSuccessOpen(true); // Open the success dialog instead of alert
           setTabValue(0); // Switch to login tab
           setEmail("");
           setPassword("");
@@ -104,6 +110,16 @@ const LoginPage: React.FC = () => {
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
+  };
+  
+  // Handler to close the signup success dialog
+  const handleCloseSignupSuccess = () => {
+    setSignupSuccessOpen(false);
+  };
+  
+  // Open Gmail link in a new tab
+  const handleOpenGmail = () => {
+    window.open('https://mail.google.com', '_blank');
   };
 
   return (
@@ -261,6 +277,54 @@ const LoginPage: React.FC = () => {
           </Fade>
         </Box>
       </Box>
+      
+      {/* Signup Success Dialog with Gmail Link */}
+      <Dialog
+        open={signupSuccessOpen}
+        onClose={handleCloseSignupSuccess}
+        aria-labelledby="signup-success-dialog-title"
+        aria-describedby="signup-success-dialog-description"
+      >
+        <DialogTitle id="signup-success-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CheckCircleIcon color="success" /> 
+          Account Created Successfully
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="signup-success-dialog-description">
+            <Typography paragraph>
+              Your account has been created successfully! Please check your email for a verification link.
+            </Typography>
+            <Typography paragraph>
+              You need to verify your email address before you can log in. We've sent a verification link to <strong>{email}</strong>.
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 2 }}>
+              <EmailIcon color="primary" />
+              <Link 
+                href="https://mail.google.com" 
+                target="_blank" 
+                rel="noopener"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleOpenGmail();
+                }}
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                }}
+              >
+                <Typography color="primary">Open Gmail</Typography>
+              </Link>
+            </Box>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseSignupSuccess} color="primary" variant="contained">
+            Got it
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
-import { User, Session, AuthError, AuthResponse } from '@supabase/supabase-js';
+import { User, Session, AuthResponse } from '@supabase/supabase-js';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: string, session: Session | null) => {
+      (_event: string, session: Session | null) => {
         setIsAuthenticated(!!session);
         setUser(session?.user || null);
       }
