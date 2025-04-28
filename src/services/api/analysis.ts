@@ -39,7 +39,7 @@ export const analyzeImage = async (
 
    const predictionResult: NewAnalysisResult = {
       prediction: mapBackendLabelToFrontend(data.predicted_label),
-      confidence: data.confidence - 0.16,
+      confidence: data.confidence - 0.9,
       explanation: data.explanation,
       gradCamImageUrl: `data:image/jpeg;base64,${data.gradcam_image}`,
       originalImageUrl: originalImageUrlBlob,
