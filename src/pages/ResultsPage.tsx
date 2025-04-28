@@ -46,8 +46,6 @@ const ResultsPage: React.FC = () => {
   const [blobUrlRef, setBlobUrlRef] = useState<string | null>(null);
   // Track if a new result has been saved to history
   const [savedToHistory, setSavedToHistory] = useState<boolean>(false);
-  // Track the ID of the saved history entry for potential redirection
-  const [savedHistoryId, setSavedHistoryId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true; // Flag to prevent state updates on unmounted component
@@ -133,7 +131,6 @@ const ResultsPage: React.FC = () => {
               
               if (historyId && isMounted) {
                 console.log(`Analysis saved to history with ID: ${historyId}`);
-                setSavedHistoryId(historyId);
                 
                 // Update state only AFTER successful save to prevent future saves
                 navigate(location.pathname, { 
